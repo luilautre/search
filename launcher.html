@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Launcher</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: #0f0f12;
+  color: #f4f4f5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+/* max-w-xl = 576px, space-y-4 = gap 16px via margin */
+.container {
+  width: 100%;
+  max-width: 576px;
+}
+
+/* text-zinc-500 text-sm tracking-widest uppercase font-medium mb-8 */
+.title {
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 14px;
+  color: #71717a;
+  font-weight: 500;
+  margin-bottom: 32px;
+  user-select: none;
+}
+
+/* relative */
+.bar-wrap {
+  position: relative;
+}
+
+/* flex items-center gap-2 px-3 py-2.5 bg-[#1a1a1f] border border-zinc-700/60 rounded-xl shadow-lg cursor-text transition-all */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #1a1a1f;
+  border: 1px solid rgba(63,63,70,0.6);
+  border-radius: 12px;
+  cursor: text;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+  transition: border-color .2s, background .2s;
+}
+
+.bar:focus-within {
+  border-color: rgba(113,113,122,0.8);
+  background: #1e1e24;
+}
+
+/* flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm font-medium shrink-0 select-none */
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #e4e4e7;
+  flex-shrink: 0;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* ml-0.5 text-zinc-500 hover:text-zinc-300 */
+.chip-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #71717a;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-left: 2px;
+  transition: color .1s;
+  flex-shrink: 0;
+}
+.chip-remove:hover { color: #d4d4d8; }
+
+/* flex-1 bg-transparent text-zinc-100 placeholder-zinc-600 text-sm outline-none min-w-0 */
+#query {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f4f4f4;
+  font-size: 14px;
+  min-width: 0;
+  font-family: inherit;
+}
+#query::placeholder { color: #52525b; }
+
+/* flex gap-1.5 shrink-0 items-center */
+.bar-hints {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* spinner */
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid #52525b;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  display: none;
+}
+.spinner.active { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* kbd: px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-xs */
+kbd {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #27272a;
+  border: 1px solid #3f3f46;
+  font-family: monospace;
+  font-size: 12px;
+  color: #52525b;
+  user-select: none;
+  line-height: 1.4;
+}
+
+/* hint kbd uses text-zinc-500 */
+.hint kbd { color: #71717a; }
+
+/* absolute top-full left-0 right-0 mt-1.5 bg-[#1a1a1f] border border-zinc-700/60 rounded-xl shadow-2xl overflow-hidden z-10 */
+.suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0; right: 0;
+  background: #1a1a1f;
+  border: 1px solid rgba(63,63,70,0.6);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 10;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+  display: none;
+}
+.suggestions.open { display: block; }
+
+/* w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors */
+.suggestion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background .1s, color .1s;
+  border-top: 1px solid rgba(39,39,42,0.6);
+  text-align: left;
+  width: 100%;
+  background: none;
+  border-left: none; border-right: none; border-bottom: none;
+  color: #d4d4d8;
+  font-family: inherit;
+}
+.suggestion:first-child { border-top: none; }
+
+/* hover: bg-zinc-800/60 text-zinc-100 */
+.suggestion:hover { background: rgba(39,39,42,0.6); color: #f4f4f4; }
+
+/* selected: bg-zinc-700/40 text-zinc-100 */
+.suggestion.selected { background: rgba(63,63,70,0.4); color: #f4f4f4; }
+
+/* w-10 h-[30px] rounded object-cover shrink-0 opacity-80 */
+.suggestion img {
+  width: 40px; height: 30px;
+  border-radius: 4px;
+  object-fit: cover;
+  opacity: .8;
+  flex-shrink: 0;
+  transition: opacity .1s;
+}
+.suggestion:hover img, .suggestion.selected img { opacity: 1; }
+
+.suggestion-info { flex: 1; min-width: 0; }
+
+/* text-sm font-medium truncate */
+.suggestion-name {
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* text-xs text-zinc-600 */
+.suggestion-sub { font-size: 12px; color: #52525b; }
+
+/* text-xs text-zinc-600 shrink-0 */
+.suggestion-price { font-size: 12px; color: #52525b; flex-shrink: 0; }
+
+/* status: text-xs px-3 py-2 rounded-lg font-mono break-all */
+.status {
+  margin-top: 16px;
+  font-size: 12px;
+  font-family: monospace;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: none;
+  word-break: break-all;
+}
+.status.show { display: block; }
+
+/* bg-red-900/30 text-red-400 border border-red-800/40 */
+.status.error {
+  background: rgba(127,29,29,0.3);
+  color: #f87171;
+  border: 1px solid rgba(153,27,27,0.4);
+}
+
+/* bg-green-900/30 text-green-400 border border-green-800/40 */
+.status.success {
+  background: rgba(20,83,45,0.3);
+  color: #4ade80;
+  border: 1px solid rgba(22,101,52,0.4);
+}
+
+/* flex flex-wrap gap-1.5 justify-center mt-4 */
+.shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-zinc-500 hover:text-zinc-300
+   bg-zinc-800/40 hover:bg-zinc-800 border border-zinc-700/40 hover:border-zinc-600/60 transition-all select-none */
+.shortcut {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #71717a;
+  background: rgba(39,39,42,0.4);
+  border: 1px solid rgba(63,63,70,0.4);
+  cursor: pointer;
+  transition: color .15s, background .15s, border-color .15s;
+  user-select: none;
+  font-family: inherit;
+}
+.shortcut:hover {
+  color: #d4d4d8;
+  background: #27272a;
+  border-color: rgba(82,82,91,0.6);
+}
+
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 12px;
+}
+.setting-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #52525b;
+  cursor: pointer;
+  user-select: none;
+}
+.setting-item select {
+  background: rgba(39,39,42,0.6);
+  border: 1px solid rgba(63,63,70,0.4);
+  border-radius: 4px;
+  color: #a1a1aa;
+  font-size: 12px;
+  padding: 2px 6px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.setting-item select:hover { border-color: rgba(82,82,91,0.6); }
+
+/* mt-4 text-center text-zinc-700 text-xs select-none */
+.hint {
+  text-align: center;
+  color: #3f3f46;
+  font-size: 12px;
+  margin-top: 16px;
+  user-select: none;
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.shake { animation: shake .4s ease-in-out; }
+</style>
+</head>
+<body>
+<div class="container">
+  <p class="title">Launcher</p>
+
+  <div class="bar-wrap">
+    <div class="bar" id="bar">
+      <div class="chip" id="chip" style="display:none"></div>
+      <input type="text" id="query" autocomplete="off" spellcheck="false"
+             placeholder="Tapez un service (google, chatgpt…) et appuyez sur Tab…" />
+      <div class="bar-hints">
+        <div class="spinner" id="spinner"></div>
+        <kbd id="tab-hint">Tab</kbd>
+        <kbd>↵</kbd>
+      </div>
+    </div>
+    <div class="suggestions" id="suggestions"></div>
+  </div>
+
+  <div class="status" id="status"></div>
+  <div class="shortcuts" id="shortcuts"></div>
+
+  <div class="settings" id="settings">
+    <label class="setting-item">
+      <span>🌐 Wikipedia</span>
+      <select id="wiki-lang-sel">
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
+        <option value="es">Español</option>
+        <option value="it">Italiano</option>
+        <option value="pt">Português</option>
+        <option value="ja">日本語</option>
+        <option value="zh">中文</option>
+        <option value="ru">Русский</option>
+      </select>
+    </label>
+    <label class="setting-item">
+      <span>⌨ Par défaut</span>
+      <select id="default-proto-sel"></select>
+    </label>
+  </div>
+
+  <p class="hint">
+    Tapez un service&nbsp;&rarr;&nbsp;<kbd>Tab</kbd>&nbsp;&rarr;&nbsp;tapez votre recherche&nbsp;&rarr;&nbsp;<kbd>Enter</kbd>
+  </p>
+</div>
+
+<script>
+// ── Favicon helper ────────────────────────────────────────────────────────────
+function faviconImg(domain, filter) {
+  const extra = filter ? `filter:${filter};` : '';
+  return `<img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" alt="" style="width:16px;height:16px;border-radius:2px;object-fit:contain;flex-shrink:0;${extra}" />`;
+}
+
+// ── Protocols ─────────────────────────────────────────────────────────────────
+const PROTOCOLS = [
+  {id:"google",     aliases:["g"],                name:"Google",     favicon:"google.com",             color:"#4285F4", kind:"web",   buildUrl:q=>`https://www.google.com/search?q=${encodeURIComponent(q)}`,         rawUrl:"https://www.google.com/"},
+  {id:"duckduckgo", aliases:["ddg","duck"],       name:"DuckDuckGo", favicon:"duckduckgo.com",         color:"#DE5833", kind:"web",   buildUrl:q=>`https://duckduckgo.com/?q=${encodeURIComponent(q)}`,                rawUrl:"https://duckduckgo.com/"},
+  {id:"chatgpt",    aliases:["gpt","openai"],     name:"ChatGPT",    favicon:"chatgpt.com",            color:"#10a37f", kind:"web",   buildUrl:q=>`https://chatgpt.com/?q=${encodeURIComponent(q)}`,                   rawUrl:"https://chatgpt.com/"},
+  {id:"claude",     aliases:["anthropic"],        name:"Claude",     favicon:"claude.ai",              color:"#D97757", kind:"web",   buildUrl:q=>`https://claude.ai/new?q=${encodeURIComponent(q)}`,                  rawUrl:"https://claude.ai/"},
+  {id:"perplexity", aliases:["perp"],             name:"Perplexity", favicon:"perplexity.ai",          color:"#20B8CD", kind:"web",   buildUrl:q=>`https://www.perplexity.ai/search?q=${encodeURIComponent(q)}`,      rawUrl:"https://perplexity.ai/"},
+  {id:"youtube",    aliases:["yt","y"],           name:"YouTube",    favicon:"youtube.com",            color:"#FF0000", kind:"web",   buildUrl:q=>`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, rawUrl:"https://www.youtube.com/"},
+  {id:"github",     aliases:["gh"],              name:"GitHub",     favicon:"github.com",              color:"#24292e", kind:"web",   buildUrl:q=>`https://github.com/search?q=${encodeURIComponent(q)}`,              rawUrl:"https://github.com/",   iconFilter:"invert(1) brightness(0.9)"},
+  {id:"wikipedia",  aliases:["wiki","wp","w"],   name:"Wikipedia",  favicon:"wikipedia.org",           color:"#3366cc", kind:"web",   buildUrl:q=>`https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(q)}`, rawUrl:"https://wikipedia.org/"},
+  {id:"steam",      aliases:["s"],              name:"Steam",      favicon:"store.steampowered.com",   color:"#1b2838", kind:"steam", buildUrl:id=>`steam://rungameid/${id}`,                                           rawUrl:"steam:launchapp"},
+];
+
+// ── Steam games (offline) ─────────────────────────────────────────────────────
+const RAW_GAMES = [
+  {id:1167630,name:"Teardown"},{id:601360,name:"Portal: Revlution"},{id:224760,name:"FEZ"},
+  {id:400,name:"Portal"},{id:620,name:"Portal 2"},{id:70,name:"Half-Life"},{id:220,name:"Half-Life 2"},
+  {id:280,name:"Half-Life: Source"},{id:500,name:"Left 4 Dead"},{id:550,name:"Left 4 Dead 2"},
+  {id:730,name:"Counter-Strike 2"},{id:570,name:"Dota 2"},{id:440,name:"Team Fortress 2"},
+  {id:4000,name:"Garry's Mod"},{id:252490,name:"Rust"},{id:346110,name:"ARK: Survival Evolved"},
+  {id:489830,name:"The Elder Scrolls V: Skyrim Special Edition"},{id:72850,name:"The Elder Scrolls V: Skyrim"},
+  {id:377160,name:"Fallout 4"},{id:22380,name:"Fallout 3"},{id:22370,name:"Fallout: New Vegas"},
+  {id:292030,name:"The Witcher 3: Wild Hunt"},{id:271590,name:"Grand Theft Auto V"},
+  {id:105600,name:"Terraria"},{id:413150,name:"Stardew Valley"},{id:367520,name:"Hollow Knight"},
+  {id:504230,name:"Celeste"},{id:456610,name:"Cuphead"},{id:570940,name:"Dark Souls: Remastered"},
+  {id:335300,name:"Dark Souls II: Scholar of the First Sin"},{id:374320,name:"DARK SOULS III"},
+  {id:1245620,name:"Elden Ring"},{id:814380,name:"Sekiro: Shadows Die Twice"},
+  {id:1091500,name:"Cyberpunk 2077"},{id:1174180,name:"Red Dead Redemption 2"},
+  {id:239140,name:"Dying Light"},{id:534380,name:"Dying Light 2"},{id:892970,name:"Valheim"},
+  {id:264710,name:"Subnautica"},{id:275850,name:"No Man's Sky"},{id:945360,name:"Among Us"},
+  {id:230410,name:"Warframe"},{id:238960,name:"Path of Exile"},{id:1145360,name:"Hades"},
+  {id:1493710,name:"Hades II"},{id:588650,name:"Dead Cells"},{id:632360,name:"Risk of Rain 2"},
+  {id:250900,name:"The Binding of Isaac: Rebirth"},{id:311690,name:"Enter the Gungeon"},
+  {id:108600,name:"Project Zomboid"},{id:294100,name:"RimWorld"},{id:427520,name:"Factorio"},
+  {id:1366540,name:"Dyson Sphere Program"},{id:1062090,name:"Satisfactory"},{id:524220,name:"NieR: Automata"},
+  {id:582010,name:"Monster Hunter: World"},{id:1446780,name:"Monster Hunter Rise"},
+  {id:2246340,name:"Monster Hunter Wilds"},{id:2050650,name:"Resident Evil 4"},
+  {id:418370,name:"Resident Evil 7 Biohazard"},{id:952060,name:"Resident Evil Village"},
+  {id:883710,name:"Resident Evil 2"},{id:1086940,name:"Baldur's Gate 3"},
+  {id:1716740,name:"God of War"},{id:1599340,name:"God of War Ragnarök"},
+  {id:2358720,name:"Black Myth: Wukong"},{id:1850570,name:"Hi-Fi Rush"},
+  {id:1237970,name:"Titanfall 2"},{id:813780,name:"Age of Empires II: Definitive Edition"},
+  {id:1066780,name:"Age of Empires III: Definitive Edition"},{id:933110,name:"Age of Empires IV"},
+  {id:8930,name:"Sid Meier's Civilization V"},{id:289070,name:"Sid Meier's Civilization VI"},
+  {id:1158190,name:"Crusader Kings III"},{id:281990,name:"Stellaris"},
+  {id:394360,name:"Hearts of Iron IV"},{id:203770,name:"Crusader Kings II"},
+  {id:242200,name:"Europa Universalis IV"},{id:255710,name:"Cities: Skylines"},
+  {id:1627720,name:"Vampire Survivors"},{id:1817070,name:"Marvel's Spider-Man Remastered"},
+  {id:2009460,name:"Marvel's Spider-Man: Miles Morales"},{id:1971870,name:"Forza Horizon 5"},
+  {id:860950,name:"Planet Zoo"},{id:295110,name:"Planet Coaster"},
+  {id:529180,name:"Oxygen Not Included"},{id:1560740,name:"Shapez 2"},
+  {id:646570,name:"Slay the Spire"},{id:2069170,name:"Slay the Spire 2"},
+  {id:1942280,name:"Dwarf Fortress"},{id:251570,name:"7 Days to Die"},
+  {id:329110,name:"Don't Starve Together"},{id:219150,name:"Don't Starve"},
+  {id:49520,name:"Borderlands 2"},{id:397540,name:"Borderlands 3"},
+  {id:1593500,name:"God of War (2018)"},{id:2322010,name:"Palworld"},
+  {id:578080,name:"PUBG: BATTLEGROUNDS"},{id:359550,name:"Tom Clancy's Rainbow Six Siege"},
+  {id:1328670,name:"Mass Effect Legendary Edition"},{id:17460,name:"Mass Effect"},
+  {id:24980,name:"Mass Effect 2"},{id:2379780,name:"Hogwarts Legacy"},
+  {id:1888930,name:"The Last of Us Part I"},{id:1272080,name:"Escape from Tarkov"},
+  {id:438100,name:"VRChat"},{id:304930,name:"Unturned"},
+  {id:306130,name:"The Elder Scrolls Online"},{id:211820,name:"Starbound"},
+  {id:286160,name:"Wartales"},{id:1466860,name:"Age of Mythology: Retold"},
+  {id:1295660,name:"Humankind"},{id:1373510,name:"Anno 1800"},
+  {id:1840080,name:"Cities: Skylines II"},{id:920210,name:"Life is Strange: True Colors"},
+  {id:319630,name:"Life is Strange"},{id:1551360,name:"Forza Horizon 5 Premium"},
+  {id:588430,name:"Fallout 76"},{id:233450,name:"Prison Architect"},
+];
+
+const seen = new Set();
+const GAMES = RAW_GAMES.filter(g => { if(seen.has(g.id)) return false; seen.add(g.id); return true; });
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let activeProtocol = null;
+let selectedIdx = -1;
+let currentSuggestions = [];
+let debounceTimer = null;
+let wikiLang = localStorage.getItem('wikiLang') || 'fr';
+let defaultProtocolId = localStorage.getItem('defaultProtocol') || 'duckduckgo';
+
+// ── DOM refs ──────────────────────────────────────────────────────────────────
+const barEl       = document.getElementById('bar');
+const chipEl      = document.getElementById('chip');
+const queryEl     = document.getElementById('query');
+const spinnerEl   = document.getElementById('spinner');
+const suggestEl   = document.getElementById('suggestions');
+const statusEl    = document.getElementById('status');
+const shortcutsEl = document.getElementById('shortcuts');
+const tabHint     = document.getElementById('tab-hint');
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+const wikiLangSel    = document.getElementById('wiki-lang-sel');
+const defaultProtoSel = document.getElementById('default-proto-sel');
+
+// Populate default protocol select with non-steam protocols
+PROTOCOLS.filter(p => p.kind !== 'steam').forEach(p => {
+  const opt = document.createElement('option');
+  opt.value = p.id;
+  opt.textContent = p.name;
+  defaultProtoSel.appendChild(opt);
+});
+
+// Restore saved values
+wikiLangSel.value = wikiLang;
+defaultProtoSel.value = defaultProtocolId;
+
+wikiLangSel.addEventListener('change', () => {
+  wikiLang = wikiLangSel.value;
+  localStorage.setItem('wikiLang', wikiLang);
+  queryEl.focus();
+});
+defaultProtoSel.addEventListener('change', () => {
+  defaultProtocolId = defaultProtoSel.value;
+  localStorage.setItem('defaultProtocol', defaultProtocolId);
+  queryEl.focus();
+});
+
+// ── Render shortcut buttons ───────────────────────────────────────────────────
+PROTOCOLS.forEach(p => {
+  const btn = document.createElement('button');
+  btn.className = 'shortcut';
+  btn.innerHTML = faviconImg(p.favicon, p.iconFilter) + `<span>${p.name}</span>`;
+  btn.addEventListener('click', () => activateProtocol(p));
+  shortcutsEl.appendChild(btn);
+});
+
+// ── Protocol helpers ──────────────────────────────────────────────────────────
+function resolveProtocol(input) {
+  const q = input.trim().toLowerCase();
+  return PROTOCOLS.find(p => p.id === q || p.name.toLowerCase() === q || p.aliases.includes(q)) || null;
+}
+
+function activateProtocol(p) {
+  activeProtocol = p;
+  // backgroundColor: color + "33", color: #e4e4e7
+  chipEl.style.cssText = `display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;font-size:14px;font-weight:500;color:#e4e4e7;flex-shrink:0;user-select:none;background:${p.color}33;`;
+  chipEl.innerHTML = faviconImg(p.favicon, p.iconFilter) +
+    `<span>${p.name}</span>` +
+    `<button class="chip-remove" tabindex="-1" aria-label="Supprimer">` +
+      `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>` +
+    `</button>`;
+  chipEl.querySelector('.chip-remove').addEventListener('click', e => { e.stopPropagation(); removeChip(); });
+  tabHint.style.display = 'none';
+  queryEl.placeholder = p.kind === 'steam' ? 'Tapez un jeu…' : 'Tapez votre recherche…';
+  queryEl.value = '';
+  queryEl.focus();
+  clearStatus();
+  clearSuggestions();
+}
+
+function removeChip() {
+  activeProtocol = null;
+  chipEl.style.display = 'none';
+  chipEl.innerHTML = '';
+  tabHint.style.display = '';
+  queryEl.placeholder = 'Tapez un service (google, chatgpt…) et appuyez sur Tab…';
+  queryEl.value = '';
+  queryEl.focus();
+  clearSuggestions();
+  clearStatus();
+}
+
+// ── Status ────────────────────────────────────────────────────────────────────
+function setStatus(type, msg) {
+  statusEl.className = `status show ${type}`;
+  statusEl.textContent = msg;
+}
+function clearStatus() {
+  statusEl.className = 'status';
+}
+
+// ── Shake ─────────────────────────────────────────────────────────────────────
+function shake() {
+  barEl.classList.remove('shake');
+  void barEl.offsetWidth;
+  barEl.classList.add('shake');
+  barEl.addEventListener('animationend', () => barEl.classList.remove('shake'), {once:true});
+}
+
+// ── Steam search ──────────────────────────────────────────────────────────────
+function searchGames(q) {
+  const lq = q.toLowerCase();
+  const exact=[], starts=[], includes=[];
+  for (const g of GAMES) {
+    const n = g.name.toLowerCase();
+    if (n === lq) exact.push(g);
+    else if (n.startsWith(lq)) starts.push(g);
+    else if (n.includes(lq)) includes.push(g);
+    if (exact.length + starts.length + includes.length >= 50) break;
+  }
+  return [...exact, ...starts, ...includes].slice(0, 8);
+}
+
+// ── Suggestions ───────────────────────────────────────────────────────────────
+function updateSuggestions(q) {
+  clearTimeout(debounceTimer);
+  if (!activeProtocol || activeProtocol.kind !== 'steam' || !q.trim()) {
+    clearSuggestions(); return;
+  }
+  debounceTimer = setTimeout(() => {
+    const results = searchGames(q);
+    currentSuggestions = results;
+    selectedIdx = -1;
+    if (!results.length) { clearSuggestions(); return; }
+    suggestEl.innerHTML = '';
+    results.forEach((g, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'suggestion';
+      btn.innerHTML =
+        `<img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${g.id}/capsule_231x87.jpg" onerror="this.style.display='none'" alt="" />` +
+        `<div class="suggestion-info"><div class="suggestion-name">${g.name}</div><div class="suggestion-sub">ID ${g.id}</div></div>`;
+      btn.addEventListener('click', () => launchSteam(g));
+      btn.addEventListener('mouseenter', () => { selectedIdx = i; highlightSuggestion(); });
+      suggestEl.appendChild(btn);
+    });
+    suggestEl.classList.add('open');
+  }, 150);
+}
+
+function clearSuggestions() {
+  suggestEl.classList.remove('open');
+  suggestEl.innerHTML = '';
+  currentSuggestions = [];
+  selectedIdx = -1;
+}
+
+function highlightSuggestion() {
+  suggestEl.querySelectorAll('.suggestion').forEach((el, i) => {
+    el.classList.toggle('selected', i === selectedIdx);
+  });
+}
+
+// ── Launch ────────────────────────────────────────────────────────────────────
+function launchSteam(game) {
+  const url = activeProtocol.buildUrl(game.id);
+  setStatus('success', `Launching ${game.name} — ${url}`);
+  clearSuggestions();
+  queryEl.value = game.name;
+  setTimeout(() => { window.location.href = url; }, 150);
+}
+
+function launchWeb(protocol, q) {
+  let url;
+  if (!q && protocol.rawUrl) {
+    url = protocol.rawUrl;
+  } else if (protocol.id === 'wikipedia') {
+    url = `https://${wikiLang}.wikipedia.org/w/index.php?search=${encodeURIComponent(q)}`;
+  } else {
+    url = protocol.buildUrl(q);
+  }
+  setStatus('success', `Opening ${protocol.name}…`);
+  clearSuggestions();
+  setTimeout(() => { window.open(url, '_blank'); }, 120);
+}
+
+// ── Keyboard ──────────────────────────────────────────────────────────────────
+queryEl.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    selectedIdx = Math.min(selectedIdx + 1, currentSuggestions.length - 1);
+    highlightSuggestion(); return;
+  }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    selectedIdx = Math.max(selectedIdx - 1, -1);
+    highlightSuggestion(); return;
+  }
+  if (e.key === 'Escape') { clearSuggestions(); return; }
+
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    if (activeProtocol) return;
+    const p = resolveProtocol(queryEl.value);
+    if (p) { activateProtocol(p); }
+    else if (queryEl.value.trim()) {
+      setStatus('error', `"${queryEl.value.trim()}" inconnu. Essayez : ${PROTOCOLS.map(p=>p.id).join(', ')}`);
+      shake();
+    }
+    return;
+  }
+
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (!activeProtocol) {
+      const p = resolveProtocol(queryEl.value);
+      if (p) { activateProtocol(p); return; }
+      if (queryEl.value.trim()) {
+        const def = PROTOCOLS.find(p => p.id === defaultProtocolId);
+        if (def) { launchWeb(def, queryEl.value.trim()); return; }
+        setStatus('error', `Protocole inconnu. Essayez : ${PROTOCOLS.map(p=>p.id).join(', ')}`);
+        shake();
+      }
+      return;
+    }
+    if (activeProtocol.kind === 'steam') {
+      if (selectedIdx >= 0 && currentSuggestions[selectedIdx]) { launchSteam(currentSuggestions[selectedIdx]); return; }
+      if (currentSuggestions.length > 0) { launchSteam(currentSuggestions[0]); return; }
+      const num = parseInt(queryEl.value.trim(), 10);
+      if (!isNaN(num) && num > 0) {
+        const url = activeProtocol.buildUrl(num);
+        setStatus('success', `Launching app ID ${num} — ${url}`);
+        setTimeout(() => { window.location.href = url; }, 150); return;
+      }
+      if (queryEl.value.trim()) { setStatus('error', `Aucun jeu trouvé pour "${queryEl.value.trim()}".`); shake(); }
+      return;
+    }
+    const q = queryEl.value.trim();
+    launchWeb(activeProtocol, q);
+    return;
+  }
+
+  if (e.key === 'Backspace' && queryEl.value === '' && activeProtocol) {
+    removeChip();
+  }
+});
+
+queryEl.addEventListener('input', () => { clearStatus(); updateSuggestions(queryEl.value); });
+barEl.addEventListener('click', () => queryEl.focus());
+document.addEventListener('click', e => { if (!barEl.contains(e.target)) clearSuggestions(); });
+
+queryEl.focus();
+</script>
+</body>
+</html>
