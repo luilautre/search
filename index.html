@@ -300,7 +300,6 @@ kbd {
 <body>
 <div class="container">
   <p class="title">Launcher</p>
-
   <div class="bar-wrap">
     <div class="bar" id="bar">
       <div class="chip" id="chip" style="display:none"></div>
@@ -314,10 +313,8 @@ kbd {
     </div>
     <div class="suggestions" id="suggestions"></div>
   </div>
-
   <div class="status" id="status"></div>
   <div class="shortcuts" id="shortcuts"></div>
-
   <div class="settings" id="settings">
     <label class="setting-item">
       <span>🌐 Wikipedia</span>
@@ -338,20 +335,15 @@ kbd {
       <select id="default-proto-sel"></select>
     </label>
   </div>
-
   <p class="hint">
     Tapez un service&nbsp;&rarr;&nbsp;<kbd>Tab</kbd>&nbsp;&rarr;&nbsp;tapez votre recherche&nbsp;&rarr;&nbsp;<kbd>Enter</kbd>
   </p>
 </div>
-
 <script>
-// ── Favicon helper ────────────────────────────────────────────────────────
 function faviconImg(domain, filter) {
   const extra = filter ? `filter:${filter};` : '';
   return `<img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" alt="" style="width:16px;height:16px;border-radius:2px;object-fit:contain;flex-shrink:0;${extra}" />`;
 }
-
-// ── Protocols ──────────────────────────────────────────────────────────
 const PROTOCOLS = [
   {id:"google",     aliases:["g"],                name:"Google",     favicon:"google.com",             color:"#4285F4", kind:"web",   rawUrl:"https://www.google.com/", buildUrl:q=>`https://www.google.com/search?q=${encodeURIComponent(q)}`},
   {id:"duckduckgo", aliases:["ddg","duck"],       name:"DuckDuckGo", favicon:"duckduckgo.com",         color:"#DE5833", kind:"web",   rawUrl:"https://duckduckgo.com/", buildUrl:q=>`https://duckduckgo.com/?q=${encodeURIComponent(q)}`},
@@ -363,16 +355,12 @@ const PROTOCOLS = [
   {id:"wikipedia",  aliases:["wiki","wp","w"],   name:"Wikipedia",  favicon:"wikipedia.org",           color:"#3366cc", kind:"web",   rawUrl:"https://wikipedia.org/",    buildUrl:q=>`https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(q)}`},
   {id:"steam",      aliases:["s"],              name:"Steam",      favicon:"store.steampowered.com",   color:"#1b2838", kind:"steam", buildUrl:id=>`steam://rungameid/${id}`},
 ];
-
-// ── State ───────────────────────────────────────────────────────────
 let activeProtocol = null;
 let selectedIdx = -1;
 let currentSuggestions = [];
 let debounceTimer = null;
 let wikiLang = localStorage.getItem('wikiLang') || 'fr';
 let defaultProtocolId = localStorage.getItem('defaultProtocol') || 'duckduckgo';
-
-// ── DOM refs ──────────────────────────────────────────────────────────
 const barEl       = document.getElementById('bar');
 const chipEl      = document.getElementById('chip');
 const queryEl     = document.getElementById('query');
@@ -381,23 +369,16 @@ const suggestEl   = document.getElementById('suggestions');
 const statusEl    = document.getElementById('status');
 const shortcutsEl = document.getElementById('shortcuts');
 const tabHint     = document.getElementById('tab-hint');
-
-// ── Settings ──────────────────────────────────────────────────────────
 const wikiLangSel    = document.getElementById('wiki-lang-sel');
 const defaultProtoSel = document.getElementById('default-proto-sel');
-
-// Populate default protocol select with non-steam protocols
 PROTOCOLS.filter(p => p.kind !== 'steam').forEach(p => {
   const opt = document.createElement('option');
   opt.value = p.id;
   opt.textContent = p.name;
   defaultProtoSel.appendChild(opt);
 });
-
-// Restore saved values
 wikiLangSel.value = wikiLang;
 defaultProtoSel.value = defaultProtocolId;
-
 wikiLangSel.addEventListener('change', () => {
   wikiLang = wikiLangSel.value;
   localStorage.setItem('wikiLang', wikiLang);
@@ -408,8 +389,6 @@ defaultProtoSel.addEventListener('change', () => {
   localStorage.setItem('defaultProtocol', defaultProtocolId);
   queryEl.focus();
 });
-
-// ── Render shortcut buttons ───────────────────────────────────────────────────
 PROTOCOLS.forEach(p => {
   const btn = document.createElement('button');
   btn.className = 'shortcut';
@@ -417,13 +396,10 @@ PROTOCOLS.forEach(p => {
   btn.addEventListener('click', () => activateProtocol(p));
   shortcutsEl.appendChild(btn);
 });
-
-// ── Protocol helpers ────────────────────────────────────────────────────────
 function resolveProtocol(input) {
   const q = input.trim().toLowerCase();
   return PROTOCOLS.find(p => p.id === q || p.name.toLowerCase() === q || p.aliases.includes(q)) || null;
 }
-
 function activateProtocol(p) {
   activeProtocol = p;
   chipEl.style.cssText = `display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;font-size:14px;font-weight:500;color:#e4e4e7;flex-shrink:0;user-select:none;background:${p.color}33;`;
@@ -440,7 +416,6 @@ function activateProtocol(p) {
   clearStatus();
   clearSuggestions();
 }
-
 function removeChip() {
   activeProtocol = null;
   chipEl.style.display = 'none';
@@ -452,8 +427,6 @@ function removeChip() {
   clearSuggestions();
   clearStatus();
 }
-
-// ── Status ───────────────────────────────────────────────────────────
 function setStatus(type, msg) {
   statusEl.className = `status show ${type}`;
   statusEl.textContent = msg;
@@ -461,54 +434,43 @@ function setStatus(type, msg) {
 function clearStatus() {
   statusEl.className = 'status';
 }
-
-// ── Shake ───────────────────────────────────────────────────────────
 function shake() {
   barEl.classList.remove('shake');
   void barEl.offsetWidth;
   barEl.classList.add('shake');
   barEl.addEventListener('animationend', () => barEl.classList.remove('shake'), {once:true});
 }
-
-// ── Steam API (LIVE, 100% gratuit) ─────────────────────────────────────────
 async function searchSteam(query) {
   try {
     spinnerEl.classList.add('active');
-    const url = `https://store.steampowered.com/search/suggest?term=${encodeURIComponent(query)}&f=games&cc=US&l=english&use_store_query=1&use_search_suggest_min=0&count=8`;
-    const response = await fetch(url);
-    
-    if (!response.ok) throw new Error(`Steam returned ${response.status}`);
-    
+    const steamUrl = `https://store.steampowered.com/search/suggest?term=${encodeURIComponent(query)}&f=games&cc=US&l=english&use_store_query=1&use_search_suggest_min=0&count=8`;
+    const proxyUrl = `https://cors.sh/${steamUrl}`;
+    const response = await fetch(proxyUrl, { headers: { 'x-cors-api-key': 'temp' } });
+    if (!response.ok) { spinnerEl.classList.remove('active'); return []; }
     const html = await response.text();
     const results = [];
-    
-    // Parser HTML: data-ds-appid="123" + img src + name + price
-    const re = /data-ds-appid="(\d+)"[\s\S]*?<div class="match_name[^"]*">([\s\S]*?)<\/div>[\s\S]*?<img src="([^"]*)"[\s\S]*?<div class="match_subtitle">([\s\S]*?)<\/div>/g;
+    const re = /data-ds-appid="(\d+)"[\s\S]*?<div class="match_name[^"]*">([ā-\S]*?)<\/div>[\s\S]*?<img src="([^"]*)"[\s\S]*?<div class="match_subtitle">([ā-\S]*?)<\/div>/g;
     let match;
     while ((match = re.exec(html)) !== null) {
       results.push({
         appid: parseInt(match[1], 10),
-        name: match[2].trim(),
+        name: match[2].replace(/<[^>]*>/g, '').trim(),
         img: match[3].trim(),
-        price: match[4].trim(),
+        price: match[4].replace(/<[^>]*>/g, '').trim(),
       });
     }
-    
     spinnerEl.classList.remove('active');
     return results;
   } catch (err) {
     console.error('Steam search failed:', err);
     spinnerEl.classList.remove('active');
+    setStatus('error', '⚠️ Steam API indisponible. Tapez l\'ID du jeu directement.');
     return [];
   }
 }
-
-// ── Suggestions ─────────────────────────────────────────────────────────
 function updateSuggestions(q) {
   clearTimeout(debounceTimer);
-  if (!activeProtocol || activeProtocol.kind !== 'steam' || !q.trim()) {
-    clearSuggestions(); return;
-  }
+  if (!activeProtocol || activeProtocol.kind !== 'steam' || !q.trim()) { clearSuggestions(); return; }
   debounceTimer = setTimeout(async () => {
     const results = await searchSteam(q);
     currentSuggestions = results;
@@ -529,21 +491,15 @@ function updateSuggestions(q) {
     suggestEl.classList.add('open');
   }, 220);
 }
-
 function clearSuggestions() {
   suggestEl.classList.remove('open');
   suggestEl.innerHTML = '';
   currentSuggestions = [];
   selectedIdx = -1;
 }
-
 function highlightSuggestion() {
-  suggestEl.querySelectorAll('.suggestion').forEach((el, i) => {
-    el.classList.toggle('selected', i === selectedIdx);
-  });
+  suggestEl.querySelectorAll('.suggestion').forEach((el, i) => { el.classList.toggle('selected', i === selectedIdx); });
 }
-
-// ── Launch ───────────────────────────────────────────────────────────
 function launchSteam(game) {
   const url = activeProtocol.buildUrl(game.appid);
   setStatus('success', `Launching ${game.name} — ${url}`);
@@ -551,7 +507,6 @@ function launchSteam(game) {
   queryEl.value = game.name;
   setTimeout(() => { window.location.href = url; }, 150);
 }
-
 function launchWeb(protocol, q) {
   let url;
   if (!q && protocol.rawUrl) {
@@ -565,33 +520,18 @@ function launchWeb(protocol, q) {
   clearSuggestions();
   setTimeout(() => { window.open(url, '_blank'); }, 120);
 }
-
-// ── Keyboard ──────────────────────────────────────────────────────────
 queryEl.addEventListener('keydown', e => {
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    selectedIdx = Math.min(selectedIdx + 1, currentSuggestions.length - 1);
-    highlightSuggestion(); return;
-  }
-  if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    selectedIdx = Math.max(selectedIdx - 1, -1);
-    highlightSuggestion(); return;
-  }
+  if (e.key === 'ArrowDown') { e.preventDefault(); selectedIdx = Math.min(selectedIdx + 1, currentSuggestions.length - 1); highlightSuggestion(); return; }
+  if (e.key === 'ArrowUp') { e.preventDefault(); selectedIdx = Math.max(selectedIdx - 1, -1); highlightSuggestion(); return; }
   if (e.key === 'Escape') { clearSuggestions(); return; }
-
   if (e.key === 'Tab') {
     e.preventDefault();
     if (activeProtocol) return;
     const p = resolveProtocol(queryEl.value);
     if (p) { activateProtocol(p); }
-    else if (queryEl.value.trim()) {
-      setStatus('error', `"${queryEl.value.trim()}" inconnu. Essayez : ${PROTOCOLS.map(p=>p.id).join(', ')}`);
-      shake();
-    }
+    else if (queryEl.value.trim()) { setStatus('error', `"${queryEl.value.trim()}" inconnu. Essayez : ${PROTOCOLS.map(p=>p.id).join(', ')}`); shake(); }
     return;
   }
-
   if (e.key === 'Enter') {
     e.preventDefault();
     if (!activeProtocol) {
@@ -621,16 +561,11 @@ queryEl.addEventListener('keydown', e => {
     launchWeb(activeProtocol, q);
     return;
   }
-
-  if (e.key === 'Backspace' && queryEl.value === '' && activeProtocol) {
-    removeChip();
-  }
+  if (e.key === 'Backspace' && queryEl.value === '' && activeProtocol) { removeChip(); }
 });
-
 queryEl.addEventListener('input', () => { clearStatus(); updateSuggestions(queryEl.value); });
 barEl.addEventListener('click', () => queryEl.focus());
 document.addEventListener('click', e => { if (!barEl.contains(e.target)) clearSuggestions(); });
-
 queryEl.focus();
 </script>
 </body>
