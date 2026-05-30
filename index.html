@@ -6,7 +6,6 @@
 <title>Launcher</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 html, body {
   height: 100%;
   background: #0f0f12;
@@ -15,7 +14,6 @@ html, body {
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
 }
-
 body {
   display: flex;
   flex-direction: column;
@@ -24,12 +22,7 @@ body {
   min-height: 100vh;
   padding: 1rem;
 }
-
-.container {
-  width: 100%;
-  max-width: 576px;
-}
-
+.container { width: 100%; max-width: 576px; }
 .title {
   text-align: center;
   text-transform: uppercase;
@@ -40,11 +33,7 @@ body {
   margin-bottom: 32px;
   user-select: none;
 }
-
-.bar-wrap {
-  position: relative;
-}
-
+.bar-wrap { position: relative; }
 .bar {
   display: flex;
   align-items: center;
@@ -57,12 +46,10 @@ body {
   box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
   transition: border-color .2s, background .2s;
 }
-
 .bar:focus-within {
   border-color: rgba(113,113,122,0.8);
   background: #1e1e24;
 }
-
 .chip {
   display: flex;
   align-items: center;
@@ -76,7 +63,6 @@ body {
   user-select: none;
   white-space: nowrap;
 }
-
 .chip-remove {
   background: none;
   border: none;
@@ -90,7 +76,6 @@ body {
   flex-shrink: 0;
 }
 .chip-remove:hover { color: #d4d4d8; }
-
 #query {
   flex: 1;
   background: transparent;
@@ -102,14 +87,12 @@ body {
   font-family: inherit;
 }
 #query::placeholder { color: #52525b; }
-
 .bar-hints {
   display: flex;
   gap: 6px;
   align-items: center;
   flex-shrink: 0;
 }
-
 .spinner {
   width: 14px; height: 14px;
   border: 2px solid #52525b;
@@ -120,7 +103,6 @@ body {
 }
 .spinner.active { display: block; }
 @keyframes spin { to { transform: rotate(360deg); } }
-
 kbd {
   display: inline-flex;
   align-items: center;
@@ -134,9 +116,7 @@ kbd {
   user-select: none;
   line-height: 1.4;
 }
-
 .hint kbd { color: #71717a; }
-
 .suggestions {
   position: absolute;
   top: calc(100% + 6px);
@@ -152,7 +132,6 @@ kbd {
   overflow-y: auto;
 }
 .suggestions.open { display: block; }
-
 .suggestion {
   display: flex;
   align-items: center;
@@ -169,13 +148,10 @@ kbd {
   font-family: inherit;
 }
 .suggestion:first-child { border-top: none; }
-
 .suggestion:hover { background: rgba(39,39,42,0.6); color: #f4f4f4; }
-
 .suggestion.selected { background: rgba(63,63,70,0.4); color: #f4f4f4; }
-
 .suggestion img {
-  width: 40px; height: 30px;
+  width: 60px; height: 28px;
   border-radius: 4px;
   object-fit: cover;
   opacity: .8;
@@ -183,9 +159,7 @@ kbd {
   transition: opacity .1s;
 }
 .suggestion:hover img, .suggestion.selected img { opacity: 1; }
-
 .suggestion-info { flex: 1; min-width: 0; }
-
 .suggestion-name {
   font-size: 14px;
   font-weight: 500;
@@ -193,11 +167,8 @@ kbd {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .suggestion-sub { font-size: 12px; color: #52525b; }
-
 .suggestion-price { font-size: 12px; color: #52525b; flex-shrink: 0; }
-
 .status {
   margin-top: 16px;
   font-size: 12px;
@@ -208,19 +179,8 @@ kbd {
   word-break: break-all;
 }
 .status.show { display: block; }
-
-.status.error {
-  background: rgba(127,29,29,0.3);
-  color: #f87171;
-  border: 1px solid rgba(153,27,27,0.4);
-}
-
-.status.success {
-  background: rgba(20,83,45,0.3);
-  color: #4ade80;
-  border: 1px solid rgba(22,101,52,0.4);
-}
-
+.status.error { background: rgba(127,29,29,0.3); color: #f87171; border: 1px solid rgba(153,27,27,0.4); }
+.status.success { background: rgba(20,83,45,0.3); color: #4ade80; border: 1px solid rgba(22,101,52,0.4); }
 .shortcuts {
   display: flex;
   flex-wrap: wrap;
@@ -228,7 +188,6 @@ kbd {
   justify-content: center;
   margin-top: 16px;
 }
-
 .shortcut {
   display: flex;
   align-items: center;
@@ -249,7 +208,6 @@ kbd {
   background: #27272a;
   border-color: rgba(82,82,91,0.6);
 }
-
 .settings {
   display: flex;
   flex-wrap: wrap;
@@ -278,7 +236,6 @@ kbd {
   transition: border-color .15s;
 }
 .setting-item select:hover { border-color: rgba(82,82,91,0.6); }
-
 .hint {
   text-align: center;
   color: #3f3f46;
@@ -286,7 +243,6 @@ kbd {
   margin-top: 16px;
   user-select: none;
 }
-
 @keyframes shake {
   0%,100% { transform: translateX(0); }
   20% { transform: translateX(-6px); }
@@ -344,33 +300,37 @@ function faviconImg(domain, filter) {
   const extra = filter ? `filter:${filter};` : '';
   return `<img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" alt="" style="width:16px;height:16px;border-radius:2px;object-fit:contain;flex-shrink:0;${extra}" />`;
 }
+
 const PROTOCOLS = [
-  {id:"google",     aliases:["g"],                name:"Google",     favicon:"google.com",             color:"#4285F4", kind:"web",   rawUrl:"https://www.google.com/", buildUrl:q=>`https://www.google.com/search?q=${encodeURIComponent(q)}`},
-  {id:"duckduckgo", aliases:["ddg","duck"],       name:"DuckDuckGo", favicon:"duckduckgo.com",         color:"#DE5833", kind:"web",   rawUrl:"https://duckduckgo.com/", buildUrl:q=>`https://duckduckgo.com/?q=${encodeURIComponent(q)}`},
-  {id:"chatgpt",    aliases:["gpt","openai"],     name:"ChatGPT",    favicon:"chatgpt.com",            color:"#10a37f", kind:"ai",    rawUrl:"https://chatgpt.com/",    buildUrl:q=>`https://chatgpt.com/?q=${encodeURIComponent(q)}`},
-  {id:"claude",     aliases:["anthropic"],        name:"Claude",     favicon:"claude.ai",              color:"#D97757", kind:"ai",    rawUrl:"https://claude.ai/",      buildUrl:q=>`https://claude.ai/new?q=${encodeURIComponent(q)}`},
-  {id:"perplexity", aliases:["perp"],             name:"Perplexity", favicon:"perplexity.ai",          color:"#20B8CD", kind:"web",   rawUrl:"https://www.perplexity.ai/", buildUrl:q=>`https://www.perplexity.ai/search?q=${encodeURIComponent(q)}`},
-  {id:"youtube",    aliases:["yt","y"],           name:"YouTube",    favicon:"youtube.com",            color:"#FF0000", kind:"web",   rawUrl:"https://www.youtube.com/",   buildUrl:q=>`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`},
-  {id:"github",     aliases:["gh"],              name:"GitHub",     favicon:"github.com",              color:"#24292e", kind:"web",   rawUrl:"https://github.com/",       buildUrl:q=>`https://github.com/search?q=${encodeURIComponent(q)}`},
-  {id:"wikipedia",  aliases:["wiki","wp","w"],   name:"Wikipedia",  favicon:"wikipedia.org",           color:"#3366cc", kind:"web",   rawUrl:"https://wikipedia.org/",    buildUrl:q=>`https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(q)}`},
-  {id:"steam",      aliases:["s"],              name:"Steam",      favicon:"store.steampowered.com",   color:"#1b2838", kind:"steam", buildUrl:id=>`steam://rungameid/${id}`},
+  {id:"google",     aliases:["g"],              name:"Google",     favicon:"google.com",           color:"#4285F4", kind:"web",   rawUrl:"https://www.google.com/",        buildUrl:q=>`https://www.google.com/search?q=${encodeURIComponent(q)}`},
+  {id:"duckduckgo", aliases:["ddg","duck"],     name:"DuckDuckGo", favicon:"duckduckgo.com",       color:"#DE5833", kind:"web",   rawUrl:"https://duckduckgo.com/",        buildUrl:q=>`https://duckduckgo.com/?q=${encodeURIComponent(q)}`},
+  {id:"chatgpt",    aliases:["gpt","openai"],   name:"ChatGPT",    favicon:"chatgpt.com",          color:"#10a37f", kind:"ai",    rawUrl:"https://chatgpt.com/",           buildUrl:q=>`https://chatgpt.com/?q=${encodeURIComponent(q)}`},
+  {id:"claude",     aliases:["anthropic"],      name:"Claude",     favicon:"claude.ai",            color:"#D97757", kind:"ai",    rawUrl:"https://claude.ai/",             buildUrl:q=>`https://claude.ai/new?q=${encodeURIComponent(q)}`},
+  {id:"perplexity", aliases:["perp"],           name:"Perplexity", favicon:"perplexity.ai",        color:"#20B8CD", kind:"web",   rawUrl:"https://www.perplexity.ai/",     buildUrl:q=>`https://www.perplexity.ai/search?q=${encodeURIComponent(q)}`},
+  {id:"youtube",    aliases:["yt","y"],         name:"YouTube",    favicon:"youtube.com",          color:"#FF0000", kind:"web",   rawUrl:"https://www.youtube.com/",       buildUrl:q=>`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`},
+  {id:"github",     aliases:["gh"],             name:"GitHub",     favicon:"github.com",           color:"#24292e", kind:"web",   rawUrl:"https://github.com/",            buildUrl:q=>`https://github.com/search?q=${encodeURIComponent(q)}`},
+  {id:"wikipedia",  aliases:["wiki","wp","w"],  name:"Wikipedia",  favicon:"wikipedia.org",        color:"#3366cc", kind:"web",   rawUrl:"https://wikipedia.org/",         buildUrl:q=>`https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(q)}`},
+  {id:"steam",      aliases:["s"],              name:"Steam",      favicon:"store.steampowered.com",color:"#1b2838", kind:"steam", buildUrl:id=>`steam://rungameid/${id}`},
 ];
+
 let activeProtocol = null;
 let selectedIdx = -1;
 let currentSuggestions = [];
 let debounceTimer = null;
 let wikiLang = localStorage.getItem('wikiLang') || 'fr';
 let defaultProtocolId = localStorage.getItem('defaultProtocol') || 'duckduckgo';
-const barEl       = document.getElementById('bar');
-const chipEl      = document.getElementById('chip');
-const queryEl     = document.getElementById('query');
-const spinnerEl   = document.getElementById('spinner');
-const suggestEl   = document.getElementById('suggestions');
-const statusEl    = document.getElementById('status');
-const shortcutsEl = document.getElementById('shortcuts');
-const tabHint     = document.getElementById('tab-hint');
-const wikiLangSel    = document.getElementById('wiki-lang-sel');
+
+const barEl        = document.getElementById('bar');
+const chipEl       = document.getElementById('chip');
+const queryEl      = document.getElementById('query');
+const spinnerEl    = document.getElementById('spinner');
+const suggestEl    = document.getElementById('suggestions');
+const statusEl     = document.getElementById('status');
+const shortcutsEl  = document.getElementById('shortcuts');
+const tabHint      = document.getElementById('tab-hint');
+const wikiLangSel  = document.getElementById('wiki-lang-sel');
 const defaultProtoSel = document.getElementById('default-proto-sel');
+
 PROTOCOLS.filter(p => p.kind !== 'steam').forEach(p => {
   const opt = document.createElement('option');
   opt.value = p.id;
@@ -379,6 +339,7 @@ PROTOCOLS.filter(p => p.kind !== 'steam').forEach(p => {
 });
 wikiLangSel.value = wikiLang;
 defaultProtoSel.value = defaultProtocolId;
+
 wikiLangSel.addEventListener('change', () => {
   wikiLang = wikiLangSel.value;
   localStorage.setItem('wikiLang', wikiLang);
@@ -389,6 +350,7 @@ defaultProtoSel.addEventListener('change', () => {
   localStorage.setItem('defaultProtocol', defaultProtocolId);
   queryEl.focus();
 });
+
 PROTOCOLS.forEach(p => {
   const btn = document.createElement('button');
   btn.className = 'shortcut';
@@ -396,10 +358,12 @@ PROTOCOLS.forEach(p => {
   btn.addEventListener('click', () => activateProtocol(p));
   shortcutsEl.appendChild(btn);
 });
+
 function resolveProtocol(input) {
   const q = input.trim().toLowerCase();
   return PROTOCOLS.find(p => p.id === q || p.name.toLowerCase() === q || p.aliases.includes(q)) || null;
 }
+
 function activateProtocol(p) {
   activeProtocol = p;
   chipEl.style.cssText = `display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;font-size:14px;font-weight:500;color:#e4e4e7;flex-shrink:0;user-select:none;background:${p.color}33;`;
@@ -416,6 +380,7 @@ function activateProtocol(p) {
   clearStatus();
   clearSuggestions();
 }
+
 function removeChip() {
   activeProtocol = null;
   chipEl.style.display = 'none';
@@ -427,47 +392,89 @@ function removeChip() {
   clearSuggestions();
   clearStatus();
 }
+
 function setStatus(type, msg) {
   statusEl.className = `status show ${type}`;
   statusEl.textContent = msg;
 }
-function clearStatus() {
-  statusEl.className = 'status';
-}
+function clearStatus() { statusEl.className = 'status'; }
+
 function shake() {
   barEl.classList.remove('shake');
   void barEl.offsetWidth;
   barEl.classList.add('shake');
   barEl.addEventListener('animationend', () => barEl.classList.remove('shake'), {once:true});
 }
+
+// ── Parseur Steam robuste via DOMParser ──────────────────────────────────────
+function parseSteamHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const results = [];
+
+  // Chaque résultat est un <a> avec data-ds-appid
+  const items = doc.querySelectorAll('a[data-ds-appid]');
+  items.forEach(a => {
+    const appid = parseInt(a.getAttribute('data-ds-appid'), 10);
+    if (!appid) return;
+
+    // Nom : .match_name
+    const nameEl = a.querySelector('.match_name');
+    const name = nameEl ? nameEl.textContent.trim() : '';
+    if (!name) return;
+
+    // Image : première <img> dans le lien
+    const imgEl = a.querySelector('img');
+    const img = imgEl ? imgEl.getAttribute('src') : '';
+
+    // Prix : .match_subtitle ou .match_price
+    const priceEl = a.querySelector('.match_subtitle, .match_price');
+    const price = priceEl ? priceEl.textContent.trim() : '';
+
+    results.push({ appid, name, img, price });
+  });
+
+  return results;
+}
+
+// ── Proxies CORS à essayer dans l'ordre ─────────────────────────────────────
+const CORS_PROXIES = [
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+];
+
+async function fetchWithFallback(targetUrl) {
+  for (const buildProxy of CORS_PROXIES) {
+    try {
+      const res = await fetch(buildProxy(targetUrl), { signal: AbortSignal.timeout(6000) });
+      if (res.ok) return await res.text();
+    } catch (_) { /* essaye le suivant */ }
+  }
+  return null;
+}
+
 async function searchSteam(query) {
-  try {
-    spinnerEl.classList.add('active');
-    const steamUrl = `https://store.steampowered.com/search/suggest?term=${encodeURIComponent(query)}&f=games&cc=US&l=english&use_store_query=1&use_search_suggest_min=0&count=8`;
-    const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(steamUrl)}`;
-    const response = await fetch(proxyUrl);
-    if (!response.ok) { spinnerEl.classList.remove('active'); return []; }
-    const html = await response.text();
-    const results = [];
-    const re = /data-ds-appid="(\d+)"[\s\S]*?<div class="match_name[^"]*">([ā-\S]*?)<\/div>[\s\S]*?<img src="([^"]*)"[\s\S]*?<div class="match_subtitle">([ā-\S]*?)<\/div>/g;
-    let match;
-    while ((match = re.exec(html)) !== null) {
-      results.push({
-        appid: parseInt(match[1], 10),
-        name: match[2].replace(/<[^>]*>/g, '').trim(),
-        img: match[3].trim(),
-        price: match[4].replace(/<[^>]*>/g, '').trim(),
-      });
-    }
-    spinnerEl.classList.remove('active');
-    return results;
-  } catch (err) {
-    console.error('Steam search failed:', err);
-    spinnerEl.classList.remove('active');
-    setStatus('error', '⚠️ Steam API indisponible. Tapez l\'ID du jeu directement.');
+  spinnerEl.classList.add('active');
+  const steamUrl = `https://store.steampowered.com/search/suggest?term=${encodeURIComponent(query)}&f=games&cc=FR&l=french&use_store_query=1&use_search_suggest_min=0&count=8`;
+
+  const html = await fetchWithFallback(steamUrl);
+  spinnerEl.classList.remove('active');
+
+  if (!html) {
+    setStatus('error', '⚠️ Steam injoignable. Entrez l\'ID du jeu manuellement.');
     return [];
   }
+
+  const results = parseSteamHTML(html);
+  if (!results.length) {
+    // Debug : affiche les 300 premiers chars pour détecter un changement de structure
+    console.debug('[Steam] HTML reçu (300c) :', html.slice(0, 300));
+  }
+  return results;
 }
+
+// ── Suggestions ──────────────────────────────────────────────────────────────
 function updateSuggestions(q) {
   clearTimeout(debounceTimer);
   if (!activeProtocol || activeProtocol.kind !== 'steam' || !q.trim()) { clearSuggestions(); return; }
@@ -481,16 +488,20 @@ function updateSuggestions(q) {
       const btn = document.createElement('button');
       btn.className = 'suggestion';
       btn.innerHTML =
-        `<img src="${g.img}" onerror="this.style.display='none'" alt="" />` +
-        `<div class="suggestion-info"><div class="suggestion-name">${g.name}</div><div class="suggestion-sub">ID ${g.appid}</div></div>` +
+        (g.img ? `<img src="${g.img}" onerror="this.style.display='none'" alt="" />` : '') +
+        `<div class="suggestion-info">
+           <div class="suggestion-name">${g.name}</div>
+           <div class="suggestion-sub">App ID ${g.appid}</div>
+         </div>` +
         `<span class="suggestion-price">${g.price}</span>`;
       btn.addEventListener('click', () => launchSteam(g));
       btn.addEventListener('mouseenter', () => { selectedIdx = i; highlightSuggestion(); });
       suggestEl.appendChild(btn);
     });
     suggestEl.classList.add('open');
-  }, 220);
+  }, 260);
 }
+
 function clearSuggestions() {
   suggestEl.classList.remove('open');
   suggestEl.innerHTML = '';
@@ -498,15 +509,17 @@ function clearSuggestions() {
   selectedIdx = -1;
 }
 function highlightSuggestion() {
-  suggestEl.querySelectorAll('.suggestion').forEach((el, i) => { el.classList.toggle('selected', i === selectedIdx); });
+  suggestEl.querySelectorAll('.suggestion').forEach((el, i) => el.classList.toggle('selected', i === selectedIdx));
 }
+
 function launchSteam(game) {
   const url = activeProtocol.buildUrl(game.appid);
-  setStatus('success', `Launching ${game.name} — ${url}`);
+  setStatus('success', `Lancement : ${game.name} — ${url}`);
   clearSuggestions();
   queryEl.value = game.name;
   setTimeout(() => { window.location.href = url; }, 150);
 }
+
 function launchWeb(protocol, q) {
   let url;
   if (!q && protocol.rawUrl) {
@@ -516,14 +529,17 @@ function launchWeb(protocol, q) {
   } else {
     url = protocol.buildUrl(q);
   }
-  setStatus('success', `Opening ${protocol.name}…`);
+  setStatus('success', `Ouverture de ${protocol.name}…`);
   clearSuggestions();
   setTimeout(() => { window.open(url, '_blank'); }, 120);
 }
+
+// ── Clavier ──────────────────────────────────────────────────────────────────
 queryEl.addEventListener('keydown', e => {
   if (e.key === 'ArrowDown') { e.preventDefault(); selectedIdx = Math.min(selectedIdx + 1, currentSuggestions.length - 1); highlightSuggestion(); return; }
-  if (e.key === 'ArrowUp') { e.preventDefault(); selectedIdx = Math.max(selectedIdx - 1, -1); highlightSuggestion(); return; }
-  if (e.key === 'Escape') { clearSuggestions(); return; }
+  if (e.key === 'ArrowUp')   { e.preventDefault(); selectedIdx = Math.max(selectedIdx - 1, -1); highlightSuggestion(); return; }
+  if (e.key === 'Escape')    { clearSuggestions(); return; }
+
   if (e.key === 'Tab') {
     e.preventDefault();
     if (activeProtocol) return;
@@ -532,6 +548,7 @@ queryEl.addEventListener('keydown', e => {
     else if (queryEl.value.trim()) { setStatus('error', `"${queryEl.value.trim()}" inconnu. Essayez : ${PROTOCOLS.map(p=>p.id).join(', ')}`); shake(); }
     return;
   }
+
   if (e.key === 'Enter') {
     e.preventDefault();
     if (!activeProtocol) {
@@ -551,18 +568,20 @@ queryEl.addEventListener('keydown', e => {
       const num = parseInt(queryEl.value.trim(), 10);
       if (!isNaN(num) && num > 0) {
         const url = activeProtocol.buildUrl(num);
-        setStatus('success', `Launching app ID ${num} — ${url}`);
-        setTimeout(() => { window.location.href = url; }, 150); return;
+        setStatus('success', `Lancement App ID ${num} — ${url}`);
+        setTimeout(() => { window.location.href = url; }, 150);
+        return;
       }
       if (queryEl.value.trim()) { setStatus('error', `Aucun jeu trouvé pour "${queryEl.value.trim()}".`); shake(); }
       return;
     }
-    const q = queryEl.value.trim();
-    launchWeb(activeProtocol, q);
+    launchWeb(activeProtocol, queryEl.value.trim());
     return;
   }
+
   if (e.key === 'Backspace' && queryEl.value === '' && activeProtocol) { removeChip(); }
 });
+
 queryEl.addEventListener('input', () => { clearStatus(); updateSuggestions(queryEl.value); });
 barEl.addEventListener('click', () => queryEl.focus());
 document.addEventListener('click', e => { if (!barEl.contains(e.target)) clearSuggestions(); });
