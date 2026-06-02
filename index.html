@@ -412,22 +412,18 @@ function parseSteamHTML(html) {
   const doc = parser.parseFromString(html, 'text/html');
   const results = [];
 
-  // Chaque résultat est un <a> avec data-ds-appid
   const items = doc.querySelectorAll('a[data-ds-appid]');
   items.forEach(a => {
     const appid = parseInt(a.getAttribute('data-ds-appid'), 10);
     if (!appid) return;
 
-    // Nom : .match_name
     const nameEl = a.querySelector('.match_name');
     const name = nameEl ? nameEl.textContent.trim() : '';
     if (!name) return;
 
-    // Image : première <img> dans le lien
     const imgEl = a.querySelector('img');
     const img = imgEl ? imgEl.getAttribute('src') : '';
 
-    // Prix : .match_subtitle ou .match_price
     const priceEl = a.querySelector('.match_subtitle, .match_price');
     const price = priceEl ? priceEl.textContent.trim() : '';
 
@@ -468,7 +464,6 @@ async function searchSteam(query) {
 
   const results = parseSteamHTML(html);
   if (!results.length) {
-    // Debug : affiche les 300 premiers chars pour détecter un changement de structure
     console.debug('[Steam] HTML reçu (300c) :', html.slice(0, 300));
   }
   return results;
@@ -585,7 +580,44 @@ queryEl.addEventListener('keydown', e => {
 queryEl.addEventListener('input', () => { clearStatus(); updateSuggestions(queryEl.value); });
 barEl.addEventListener('click', () => queryEl.focus());
 document.addEventListener('click', e => { if (!barEl.contains(e.target)) clearSuggestions(); });
-queryEl.focus();
+
+// ── Paramètre URL ?q= ────────────────────────────────────────────────────────
+(function initFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get('q');
+  if (!q || !q.trim()) { queryEl.focus(); return; }
+
+  // Format attendu :
+  //   ?q=chatgpt:comment fonctionne l'IA   → active ChatGPT puis recherche
+  //   ?q=comment fonctionne l'IA           → utilise le moteur par défaut
+  const colonIdx = q.indexOf(':');
+  if (colonIdx > 0) {
+    const protoStr = q.slice(0, colonIdx).trim();
+    const searchStr = q.slice(colonIdx + 1).trim();
+    const p = resolveProtocol(protoStr);
+    if (p) {
+      activateProtocol(p);
+      queryEl.value = searchStr;
+      if (p.kind === 'steam') {
+        updateSuggestions(searchStr);
+      } else {
+        launchWeb(p, searchStr);
+      }
+      return;
+    }
+  }
+
+  // Pas de préfixe protocole → moteur par défaut
+  const def = PROTOCOLS.find(p => p.id === defaultProtocolId);
+  if (def) {
+    activateProtocol(def);
+    queryEl.value = q.trim();
+    launchWeb(def, q.trim());
+  } else {
+    queryEl.value = q.trim();
+    queryEl.focus();
+  }
+})();
 </script>
 </body>
 </html>
