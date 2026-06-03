@@ -290,6 +290,13 @@ kbd {
       <span>⌨ Par défaut</span>
       <select id="default-proto-sel"></select>
     </label>
+    <label class="setting-item">
+      <span>🗔 Ouverture</span>
+      <select id="target-sel">
+        <option value="_self">Même onglet</option>
+        <option value="_blank">Nouvel onglet</option>
+      </select>
+    </label>
   </div>
   <p class="hint">
     Tapez un service&nbsp;&rarr;&nbsp;<kbd>Tab</kbd>&nbsp;&rarr;&nbsp;tapez votre recherche&nbsp;&rarr;&nbsp;<kbd>Enter</kbd>
@@ -305,9 +312,9 @@ const PROTOCOLS = [
   {id:"google",     aliases:["g"],              name:"Google",     favicon:"google.com",           color:"#4285F4", kind:"web",   rawUrl:"https://www.google.com/",        buildUrl:q=>`https://www.google.com/search?q=${encodeURIComponent(q)}`},
   {id:"duckduckgo", aliases:["ddg","duck"],     name:"DuckDuckGo", favicon:"duckduckgo.com",       color:"#DE5833", kind:"web",   rawUrl:"https://duckduckgo.com/",        buildUrl:q=>`https://duckduckgo.com/?q=${encodeURIComponent(q)}`},
   {id:"chatgpt",    aliases:["gpt","openai"],   name:"ChatGPT",    favicon:"chatgpt.com",          color:"#10a37f", kind:"ai",    rawUrl:"https://chatgpt.com/",           buildUrl:q=>`https://chatgpt.com/?q=${encodeURIComponent(q)}`},
-  {id:"claude",     aliases:["anthropic"],      name:"Claude",     favicon:"claude.ai",            color:"#D97757", kind:"ai",    rawUrl:"https://claude.ai/",             buildUrl:q=>`https://claude.ai/new?q=${encodeURIComponent(q)}`},
-  {id:"perplexity", aliases:["perp"],           name:"Perplexity", favicon:"perplexity.ai",        color:"#20B8CD", kind:"web",   rawUrl:"https://www.perplexity.ai/",     buildUrl:q=>`https://www.perplexity.ai/search?q=${encodeURIComponent(q)}`},
-  {id:"youtube",    aliases:["yt","y"],         name:"YouTube",    favicon:"youtube.com",          color:"#FF0000", kind:"web",   rawUrl:"https://www.youtube.com/",       buildUrl:q=>`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`},
+  {id:"claude",     aliases:["anthropic"],      name:"Claude",     favicon:"claude.ai",            color:"#D97757", kind:"ai",    rawUrl:"https://claude.ai/",             buildUrl:q=>`https://claude.ai/?q=${encodeURIComponent(q)}`},
+  {id:"perplexity", aliases:["perp"],           name:"Perplexity", favicon:"perplexity.ai",        color:"#20B8CD", kind:"web",   rawUrl:"https://www.perplexity.ai/",     buildUrl:q=>`https://www.perplexity.ai/?q=${encodeURIComponent(q)}`},
+  {id:"youtube",    aliases:["yt","y"],         name:"YouTube",    favicon:"youtube.com",          color:"#FF0000", kind:"web",   rawUrl:"https://www.youtube.com/",       buildUrl:q=>`https://www.youtube.com/search?search_query=${encodeURIComponent(q)}`},
   {id:"github",     aliases:["gh"],             name:"GitHub",     favicon:"github.com",           color:"#24292e", kind:"web",   rawUrl:"https://github.com/",            buildUrl:q=>`https://github.com/search?q=${encodeURIComponent(q)}`},
   {id:"wikipedia",  aliases:["wiki","wp","w"],  name:"Wikipedia",  favicon:"wikipedia.org",        color:"#3366cc", kind:"web",   rawUrl:"https://wikipedia.org/",         buildUrl:q=>`https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(q)}`},
   {id:"steam",      aliases:["s"],              name:"Steam",      favicon:"store.steampowered.com",color:"#1b2838", kind:"steam", buildUrl:id=>`steam://rungameid/${id}`},
@@ -319,6 +326,7 @@ let currentSuggestions = [];
 let debounceTimer = null;
 let wikiLang = localStorage.getItem('wikiLang') || 'fr';
 let defaultProtocolId = localStorage.getItem('defaultProtocol') || 'duckduckgo';
+let openTarget = localStorage.getItem('openTarget') || '_blank';
 
 const barEl        = document.getElementById('bar');
 const chipEl       = document.getElementById('chip');
@@ -330,6 +338,7 @@ const shortcutsEl  = document.getElementById('shortcuts');
 const tabHint      = document.getElementById('tab-hint');
 const wikiLangSel  = document.getElementById('wiki-lang-sel');
 const defaultProtoSel = document.getElementById('default-proto-sel');
+const targetSel    = document.getElementById('target-sel');
 
 PROTOCOLS.filter(p => p.kind !== 'steam').forEach(p => {
   const opt = document.createElement('option');
@@ -339,6 +348,7 @@ PROTOCOLS.filter(p => p.kind !== 'steam').forEach(p => {
 });
 wikiLangSel.value = wikiLang;
 defaultProtoSel.value = defaultProtocolId;
+targetSel.value = openTarget;
 
 wikiLangSel.addEventListener('change', () => {
   wikiLang = wikiLangSel.value;
@@ -348,6 +358,11 @@ wikiLangSel.addEventListener('change', () => {
 defaultProtoSel.addEventListener('change', () => {
   defaultProtocolId = defaultProtoSel.value;
   localStorage.setItem('defaultProtocol', defaultProtocolId);
+  queryEl.focus();
+});
+targetSel.addEventListener('change', () => {
+  openTarget = targetSel.value;
+  localStorage.setItem('openTarget', openTarget);
   queryEl.focus();
 });
 
@@ -366,7 +381,7 @@ function resolveProtocol(input) {
 
 function activateProtocol(p) {
   activeProtocol = p;
-  chipEl.style.cssText = `display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;font-size:14px;font-weight:500;color:#e4e4e7;flex-shrink:0;user-select:none;background:${p.color}33;`;
+  chipEl.style.cssText = `display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;font-size:14px;font-weight:500;color:#e4e4e7;flex-shrink:0;user-select:none;background:${p.color}33;border:1px solid ${p.color}66`;
   chipEl.innerHTML = faviconImg(p.favicon) +
     `<span>${p.name}</span>` +
     `<button class="chip-remove" tabindex="-1" aria-label="Supprimer">` +
@@ -469,7 +484,7 @@ async function searchSteam(query) {
   return results;
 }
 
-// ── Suggestions ──────────────────────────────────────────────────────────────
+// ── Suggestions ───────────────────────────────────────────────────────────
 function updateSuggestions(q) {
   clearTimeout(debounceTimer);
   if (!activeProtocol || activeProtocol.kind !== 'steam' || !q.trim()) { clearSuggestions(); return; }
@@ -512,7 +527,13 @@ function launchSteam(game) {
   setStatus('success', `Lancement : ${game.name} — ${url}`);
   clearSuggestions();
   queryEl.value = game.name;
-  setTimeout(() => { window.location.href = url; }, 150);
+  setTimeout(() => {
+    if (openTarget === '_self') {
+      window.location.href = url;
+    } else {
+      window.open(url, '_blank');
+    }
+  }, 150);
 }
 
 function launchWeb(protocol, q) {
@@ -526,10 +547,16 @@ function launchWeb(protocol, q) {
   }
   setStatus('success', `Ouverture de ${protocol.name}…`);
   clearSuggestions();
-  setTimeout(() => { window.open(url, '_blank'); }, 120);
+  setTimeout(() => {
+    if (openTarget === '_self') {
+      window.location.href = url;
+    } else {
+      window.open(url, '_blank');
+    }
+  }, 120);
 }
 
-// ── Clavier ──────────────────────────────────────────────────────────────────
+// ── Clavier ────────────────────────────────────────────────────────────────
 queryEl.addEventListener('keydown', e => {
   if (e.key === 'ArrowDown') { e.preventDefault(); selectedIdx = Math.min(selectedIdx + 1, currentSuggestions.length - 1); highlightSuggestion(); return; }
   if (e.key === 'ArrowUp')   { e.preventDefault(); selectedIdx = Math.max(selectedIdx - 1, -1); highlightSuggestion(); return; }
@@ -564,7 +591,13 @@ queryEl.addEventListener('keydown', e => {
       if (!isNaN(num) && num > 0) {
         const url = activeProtocol.buildUrl(num);
         setStatus('success', `Lancement App ID ${num} — ${url}`);
-        setTimeout(() => { window.location.href = url; }, 150);
+        setTimeout(() => {
+          if (openTarget === '_self') {
+            window.location.href = url;
+          } else {
+            window.open(url, '_blank');
+          }
+        }, 150);
         return;
       }
       if (queryEl.value.trim()) { setStatus('error', `Aucun jeu trouvé pour "${queryEl.value.trim()}".`); shake(); }
