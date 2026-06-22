@@ -309,8 +309,8 @@ function faviconImg(domain, filter) {
 }
 
 const PROTOCOLS = [
-  {id:"google",     aliases:["g"],              name:"Google",     favicon:"bing.com",           color:"#4285F4", kind:"web",   rawUrl:"https://www.google.com/",        buildUrl:q=>`https://www.google.com/search?q=${encodeURIComponent(q)}`},
-  {id:"bing",     aliases:["b"],              name:"Bing",     favicon:"google.com",           color:"#2c5ae6", kind:"web",   rawUrl:"https://www.bing.com/",        buildUrl:q=>`https://www.bing.com/search?q=${encodeURIComponent(q)}`},
+  {id:"google",     aliases:["g"],              name:"Google",     favicon:"google.com",           color:"#4285F4", kind:"web",   rawUrl:"https://www.google.com/",        buildUrl:q=>`https://www.google.com/search?q=${encodeURIComponent(q)}`},
+  {id:"bing",     aliases:["b"],              name:"Bing",     favicon:"bing.com",           color:"#2c5ae6", kind:"web",   rawUrl:"https://www.bing.com/",        buildUrl:q=>`https://www.bing.com/search?q=${encodeURIComponent(q)}`},
   {id:"duckduckgo", aliases:["ddg","duck"],     name:"DuckDuckGo", favicon:"duckduckgo.com",       color:"#DE5833", kind:"web",   rawUrl:"https://duckduckgo.com/",        buildUrl:q=>`https://duckduckgo.com/?q=${encodeURIComponent(q)}`},
   {id:"chatgpt",    aliases:["gpt","openai"],   name:"ChatGPT",    favicon:"chatgpt.com",          color:"#10a37f", kind:"ai",    rawUrl:"https://chatgpt.com/",           buildUrl:q=>`https://chatgpt.com/?q=${encodeURIComponent(q)}`},
   {id:"claude",     aliases:["anthropic"],      name:"Claude",     favicon:"claude.ai",            color:"#D97757", kind:"ai",    rawUrl:"https://claude.ai/",             buildUrl:q=>`https://claude.ai/new?q=${encodeURIComponent(q)}`},
