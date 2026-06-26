@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page avec Wake Lock et Fullscreen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+        }
+
+        iframe {
+            width: 90%;
+            height: 90%;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .loading {
+            color: #fff;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">Initialisation...</div>
+
+    <script>
+        let wakeLock = null;
+
+        // Fonction pour activer le wake lock
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Wake Lock activé');
+                    
+                    // Réactiver le wake lock si l'appareil se réveille
+                    wakeLock.addEventListener('release', async () => {
+                        console.log('Wake Lock released');
+                        try {
+                            wakeLock = await navigator.wakeLock.request('screen');
+                        } catch (err) {
+                            console.log('Wake Lock re-activation failed:', err);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.log('Wake Lock request failed:', err);
+            }
+        }
+
+        // Fonction pour entrer en fullscreen
+        async function requestFullscreen() {
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                    console.log('Fullscreen activé');
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    await document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    await document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    await document.documentElement.msRequestFullscreen();
+                }
+            } catch (err) {
+                console.log('Fullscreen request failed:', err);
+            }
+        }
+
+        // Fonction pour créer l'iframe
+        function createIframe() {
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://startscreen.org/win10'; // Remplacer par l'URL souhaitée
+            iframe.title = 'Contenu intégré';
+            document.body.innerHTML = '';
+            document.body.appendChild(iframe);
+        }
+
+        // Initialisation au chargement de la page
+        window.addEventListener('load', async () => {
+            // Activer le wake lock
+            await requestWakeLock();
+            
+            // Entrer en fullscreen
+            await requestFullscreen();
+            
+            // Créer l'iframe
+            createIframe();
+        });
+
+        // Optionnel : réactiver le wake lock lors d'une interaction utilisateur
+        document.addEventListener('click', async () => {
+            if (!wakeLock) {
+                await requestWakeLock();
+            }
+        });
+
+        // Gestion des changements de visibilité
+        document.addEventListener('visibilitychange', async () => {
+            if (document.hidden) {
+                if (wakeLock) {
+                    await wakeLock.release();
+                    wakeLock = null;
+                }
+            } else {
+                await requestWakeLock();
+            }
+        });
+    </script>
+</body>
+</html>
