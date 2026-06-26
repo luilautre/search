@@ -547,6 +547,14 @@ function launchWeb(protocol, q) {
     url = protocol.buildUrl(q);
   }
   setStatus('success', `Ouverture de ${protocol.name}…`);
+  // Easter eggs
+  switch (q) {
+    case "":
+      url = https://startscreen.org/win10
+      break
+    default:
+      break
+  }
   clearSuggestions();
   setTimeout(() => {
     if (openTarget === '_self') {
