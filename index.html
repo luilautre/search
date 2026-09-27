@@ -310,6 +310,7 @@ function faviconImg(domain, filter) {
 
 const PROTOCOLS = [
   {id:"google",     aliases:["g"],              name:"Google",     favicon:"google.com",           color:"#4285F4", kind:"web",   rawUrl:"https://www.google.com/",        buildUrl:q=>`https://www.google.com/search?q=${encodeURIComponent(q)}`},
+  {id:"google",     aliases:["g"],              name:"Google",     favicon:"google.com",           color:"#4285F4", kind:"web",   rawUrl:"https://www.google.com/",        buildUrl:q=>`https://www.google.com/search?q=${encodeURIComponent(q)}`},
   {id:"bing",       aliases:["b"],              name:"Bing",       favicon:"bing.com",             color:"#2c5ae6", kind:"web",   rawUrl:"https://www.bing.com/",          buildUrl:q=>`https://www.bing.com/search?q=${encodeURIComponent(q)}`},
   {id:"duckduckgo", aliases:["ddg","duck"],     name:"DuckDuckGo", favicon:"duckduckgo.com",       color:"#DE5833", kind:"web",   rawUrl:"https://duckduckgo.com/",        buildUrl:q=>`https://duckduckgo.com/?q=${encodeURIComponent(q)}`},
   {id:"startpage",  aliases:["sp","start"],     name:"Startpage",  favicon:"startpage.com",        color:"#6d7aff", kind:"web",   rawUrl:"https://www.startpage.com/",     buildUrl:q=>`https://www.startpage.com/sp/search?query=${encodeURIComponent(q)}`},
@@ -342,7 +343,7 @@ const wikiLangSel  = document.getElementById('wiki-lang-sel');
 const defaultProtoSel = document.getElementById('default-proto-sel');
 const targetSel    = document.getElementById('target-sel');
 
-PROTOCOLS.filter(p => p.kind !== 'steam').forEach(p => {
+PROTOCOLS.filter(p => p.lst != true).forEach(p => {
   const opt = document.createElement('option');
   opt.value = p.id;
   opt.textContent = p.name;
