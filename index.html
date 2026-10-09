@@ -555,6 +555,7 @@ function launchWeb(protocol, q) {
       setStatus('success', `Démarrage de Windows…`);
       break
     default:
+      if (q.startsWith("Disabled: http")) url = q.slice(10);
       break
   }
   clearSuggestions();
