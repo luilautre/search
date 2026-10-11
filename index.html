@@ -553,13 +553,17 @@ function launchWeb(protocol, q) {
     case "":
       url = "https://luilautre.github.io/search/eggs/windows.html"
       setStatus('success', `Démarrage de Windows…`);
-      break
+      break;
     default:
       if (q.startsWith("Disabled: http")){
         url = q.slice(10);
         setStatus('success', `Ouverture de ${url}`);
+      }else{
+        if ( q.startsWith("r/") || ( q.startsWith("u/") && q !== "u/" )){
+          url = "https://www.reddit.com/"+q
+        }
       }
-      break
+      break;
   }
   clearSuggestions();
   setTimeout(() => {
