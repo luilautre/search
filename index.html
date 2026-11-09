@@ -258,6 +258,7 @@ kbd {
 <div class="container">
   <p class="title">Launcher</p>
   <div class="bar-wrap">
+    <form action="/search.html" method="GET">
     <div class="bar" id="bar">
       <div class="chip" id="chip" style="display:none"></div>
       <input type="text" id="query" autocomplete="off" spellcheck="false"
@@ -268,6 +269,8 @@ kbd {
         <kbd>↵</kbd>
       </div>
     </div>
+    <button type="submit" style="display:none;">Rechercher</button>
+    </form>
     <div class="suggestions" id="suggestions"></div>
   </div>
   <div class="status" id="status"></div>
