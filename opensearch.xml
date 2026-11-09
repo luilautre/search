@@ -1,0 +1,7 @@
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>luilautre</ShortName>
+  <Description>Rechercher avec luilautre</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <Image height="16" width="16" type="image/x-icon">https://luilautre.github.io/favicon.ico</Image>
+  <Url type="text/html" template="https://luilautre.github.io/search?q={searchTerms}"/>
+</OpenSearchDescription>
